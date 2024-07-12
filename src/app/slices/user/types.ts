@@ -1,3 +1,2 @@
-export type IUser = {
-  balance: number
-}
+export type TReel = Array<string>
+export type TCurrentReel = string | null

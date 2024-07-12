@@ -1,25 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { IUser } from './types'
+import { TBetHistoryRow } from '../game'
 
 export type IUserState = {
-  user: IUser
+  balance: number
+  betHistory: Array<TBetHistoryRow>
 }
 
 export const initialState: IUserState = {
-  user: {
-    balance: 100,
-  },
+  balance: 0,
+  betHistory: [],
 }
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    increaseBalance: (state, action: PayloadAction<number>) => {
-      state.user.balance += action.payload
+    setBalance: (state, action: PayloadAction<number>) => {
+      state.balance = action.payload
     },
-    decreaseBalance: (state, action: PayloadAction<number>) => {
-      state.user.balance -= action.payload
+    setBetHistory: (state, action: PayloadAction<Array<TBetHistoryRow>>) => {
+      state.betHistory = action.payload
     },
   },
 })

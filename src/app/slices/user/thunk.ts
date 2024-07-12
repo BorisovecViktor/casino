@@ -1,5 +1,7 @@
 import { createAction } from '@reduxjs/toolkit'
-import { INCREASE_BALANCE, DECREASE_BALANCE } from './action-type'
+import { SET_BALANCE, SET_BET_HISTORY } from './action-type'
+import { TBetHistoryRow } from '../game'
 
-export const increaseBalance = createAction<number>(INCREASE_BALANCE)
-export const decreaseBalance = createAction<number>(DECREASE_BALANCE)
+export const setBalance = createAction<number>(SET_BALANCE)
+export const setBetHistory =
+  createAction<Array<TBetHistoryRow>>(SET_BET_HISTORY)

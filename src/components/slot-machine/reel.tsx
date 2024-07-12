@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Box, Stack } from '@mui/material'
 import { CSSTransition } from 'react-transition-group'
-import { TCurrentReel, TReel } from './types'
+import { TCurrentReel, TReel } from '../../app/slices/user/types'
 
 type Props = {
   id: number

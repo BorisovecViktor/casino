@@ -1,43 +1,77 @@
 import { ChangeEvent, useState } from 'react'
+import { createSelector } from '@reduxjs/toolkit'
+import { RootState } from 'app/slices'
+import { TBetHistoryRow } from 'app/slices/game'
 import { Button, Link, Stack, TextField } from '@mui/material'
-import { useBoolean } from 'hooks/use-boolean'
+import { useBoolean, useAppSelector } from 'hooks'
+import { TCurrentReel } from '../../app/slices/user/types'
 import { DURATION, MIN_BET, WIN_COEFFICIENT } from 'utils/constants'
 import { initialReels, reels } from 'app/data'
 import { Balance } from 'components'
 import { Reel } from './reel'
 import { ReelsTitle } from './reels-title'
-import { TCurrentReel } from './types'
 import 'styles/slot-machine.css'
-import { RootState } from 'app/slices'
-import { createSelector } from '@reduxjs/toolkit'
-import { useAppDispatch, useAppSelector } from 'hooks/use-redux'
-import { decreaseBalance, increaseBalance } from 'app/slices/user'
 
-export const SlotMachine = () => {
-  const dispatch = useAppDispatch()
+type Props = {
+  balance: number
+  betHistory: Array<TBetHistoryRow>
+  onBalance: (newValue: unknown) => void
+  onBetHistory: (newValue: unknown) => void
+}
+
+export const SlotMachine = ({
+  balance,
+  betHistory,
+  onBalance,
+  onBetHistory,
+}: Props) => {
   const [currentReels, setCurrentReels] =
     useState<Array<TCurrentReel>>(initialReels)
-  let spinningReels = [...reels]
   const isAnimation = useBoolean(false)
   const isWinner = useBoolean(false)
-  const [bet, setBet] = useState<string>('')
+  // visibility of congratulation title
   const titleVisibility = isAnimation.isTrue || currentReels === initialReels
+  // current bet amount
+  const [bet, setBet] = useState<string>('')
+  // reels for make spinning animation effect
+  let spinningReels = [...reels]
+  // get data from store
   const userSelector = (state: RootState) => state.User
   const stateUser = createSelector(userSelector, (state) => ({
-    user: state.user,
+    user: state,
   }))
   const { user } = useAppSelector(stateUser)
+  const gameSelector = (state: RootState) => state.Game
+  const stateGame = createSelector(gameSelector, (state) => ({
+    game: state,
+  }))
+  const { game } = useAppSelector(stateGame)
+  // manage balance
+  const increaseBalance = balance + Number(bet) * WIN_COEFFICIENT
+  const decreaseBalance = balance - Number(bet)
 
+  // define win / lose
   const handleWinner = (newReels: Array<TCurrentReel>) => {
     const isEqual = new Set(newReels).size === 1
 
     if (isEqual) {
       isWinner.setTrue()
 
-      dispatch(increaseBalance(Number(bet) * WIN_COEFFICIENT))
+      onBalance(increaseBalance)
     } else {
       isWinner.setFalse()
     }
+
+    onBetHistory([
+      ...betHistory,
+      {
+        date: new Date().toString(),
+        amount: bet,
+        type: game.gameType,
+        result: isEqual,
+        balance: isEqual ? increaseBalance : decreaseBalance,
+      },
+    ])
   }
 
   const handleChangeBet = (e: ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +82,7 @@ export const SlotMachine = () => {
     }
   }
 
+  // define new reels state / run animation / set balance and history
   const handleSpin = () => {
     const newReels = reels.map((reel, i) => {
       const randomIndex = Math.floor(Math.random() * reel.length)
@@ -66,13 +101,13 @@ export const SlotMachine = () => {
     isAnimation.setTrue()
     setCurrentReels(initialReels)
     if (bet) {
-      dispatch(decreaseBalance(Number(bet)))
+      onBalance(decreaseBalance)
     }
+    handleWinner(newReels)
 
     setTimeout(() => {
       setCurrentReels(newReels)
       isAnimation.setFalse()
-      handleWinner(newReels)
     }, DURATION)
   }
 

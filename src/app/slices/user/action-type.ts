@@ -1,2 +1,2 @@
-export const INCREASE_BALANCE = 'user/increaseBalance'
-export const DECREASE_BALANCE = 'user/decreaseBalance'
+export const SET_BALANCE = 'user/setBalance'
+export const SET_BET_HISTORY = 'user/setBetHistory'

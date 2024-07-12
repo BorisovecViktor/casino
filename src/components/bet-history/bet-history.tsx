@@ -9,11 +9,20 @@ import {
   Typography,
 } from '@mui/material'
 import { format } from 'date-fns'
-import { rows } from 'app/data'
 import { grey } from '@mui/material/colors'
 import { APP_LAYOUT } from 'utils/constants'
+import { RootState } from 'app/slices'
+import { createSelector } from '@reduxjs/toolkit'
+import { useAppSelector } from 'hooks/use-redux'
+import { v4 as uuid } from 'uuid'
 
 export const BetHistory = () => {
+  const userSelector = (state: RootState) => state.User
+  const stateUser = createSelector(userSelector, (state) => ({
+    user: state,
+  }))
+  const { user } = useAppSelector(stateUser)
+
   return (
     <TableContainer
       component={Paper}
@@ -36,8 +45,8 @@ export const BetHistory = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(({ id, date, amount, type, result, balance }) => (
-            <TableRow key={id}>
+          {user.betHistory.map(({ date, amount, type, result, balance }) => (
+            <TableRow key={uuid()}>
               <TableCell component="th" scope="row">
                 <Typography>{format(date, 'dd.MM.yyyy')}</Typography>
               </TableCell>

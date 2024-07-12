@@ -1,10 +1,13 @@
 import { combineReducers } from 'redux'
 import { configureStore } from '@reduxjs/toolkit'
 
+// Game
+import gameReducer from './game/reducer'
 // User
 import userReducer from './user/reducer'
 
 const appReducer = combineReducers({
+  Game: gameReducer,
   User: userReducer,
 })
 
