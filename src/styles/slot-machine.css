@@ -1,0 +1,12 @@
+.reel-animation-enter-active {
+  transform: translateY(-83%);
+  transition: transform 2000ms;
+}
+
+.reel-animation-exit-active {
+  opacity: 0;
+}
+
+.reel-animation-exit-done {
+  opacity: 0;
+}
