@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { TBetHistoryRow } from 'app/slices/game'
 
 export const useLocalStorage = (
@@ -21,17 +21,20 @@ export const useLocalStorage = (
     }
   })
 
-  const setValue = (
-    newValue: string | null | number | Array<TBetHistoryRow>,
-  ) => {
-    try {
-      localStorage.setItem(keyName, JSON.stringify(newValue))
-    } catch (err) {
-      console.log(err)
-    }
+  const setValue = useCallback(
+    (newValue: string | null | number | Array<TBetHistoryRow>) => {
+      try {
+        localStorage.setItem(keyName, JSON.stringify(newValue))
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(error.message)
+        }
+      }
 
-    setStoredValue(newValue)
-  }
+      setStoredValue(newValue)
+    },
+    [keyName],
+  )
 
   return [storedValue, setValue]
 }

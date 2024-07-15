@@ -1,8 +1,7 @@
 import { ChangeEvent, useState } from 'react'
 import { createSelector } from '@reduxjs/toolkit'
-import { Box, Button, Stack } from '@mui/material'
+import { Button, Stack } from '@mui/material'
 import { RootState } from 'app/slices'
-import { TBetHistoryRow } from 'app/slices/game'
 import { TCurrentReel } from 'app/slices/user/types'
 import { useBoolean, useAppSelector } from 'hooks'
 import {
@@ -18,18 +17,11 @@ import 'styles/slot-machine.css'
 import { TextField } from 'components/shared'
 
 type Props = {
-  balance: number
-  betHistory: Array<TBetHistoryRow>
   onBalance: (newValue: unknown) => void
   onBetHistory: (newValue: unknown) => void
 }
 
-export const SlotMachine = ({
-  balance,
-  betHistory,
-  onBalance,
-  onBetHistory,
-}: Props) => {
+export const SlotMachine = ({ onBalance, onBetHistory }: Props) => {
   const [currentReels, setCurrentReels] =
     useState<Array<TCurrentReel>>(initialReels)
   const isAnimation = useBoolean(false)
@@ -42,14 +34,15 @@ export const SlotMachine = ({
   // get data from store
   const userSelector = (state: RootState) => state.User
   const stateUser = createSelector(userSelector, (state) => ({
-    user: state,
+    balance: state.balance,
+    betHistory: state.betHistory,
   }))
-  const { user } = useAppSelector(stateUser)
+  const { balance, betHistory } = useAppSelector(stateUser)
   const gameSelector = (state: RootState) => state.Game
   const stateGame = createSelector(gameSelector, (state) => ({
-    game: state,
+    gameType: state.gameType,
   }))
-  const { game } = useAppSelector(stateGame)
+  const { gameType } = useAppSelector(stateGame)
   const decreaseBalance = balance - Number(bet)
 
   // define win or lose / set balance / set history
@@ -73,7 +66,7 @@ export const SlotMachine = ({
       {
         date: new Date().toString(),
         amount: bet,
-        type: game.gameType,
+        type: gameType,
         result: isEqual,
         balance: isEqual ? increasedBalance : decreaseBalance,
       },
@@ -86,7 +79,7 @@ export const SlotMachine = ({
     if (
       value === '' ||
       (Number(value) >= MIN_BET &&
-        Number(value) <= user.balance &&
+        Number(value) <= balance &&
         regex_numbers.test(value))
     ) {
       setBet(value)
@@ -154,19 +147,19 @@ export const SlotMachine = ({
           label="Bet amount"
           value={bet}
           onChange={handleChangeBet}
-          placeholder={`From 1 to ${user.balance}`}
-          disabled={isAnimation.isTrue || user.balance === 0}
+          placeholder={`From 1 to ${balance}`}
+          disabled={isAnimation.isTrue || balance === 0}
         />
         <Button
           variant="outlined"
           size="large"
           onClick={handleSpin}
-          disabled={isAnimation.isTrue || user.balance === 0 || !bet}
+          disabled={isAnimation.isTrue || balance === 0 || !bet}
         >
           Try your luck
         </Button>
       </Stack>
-      {user.balance === 0 && !isAnimation.isTrue && <BuyCoins />}
+      {balance === 0 && !isAnimation.isTrue && <BuyCoins />}
     </Stack>
   )
 }

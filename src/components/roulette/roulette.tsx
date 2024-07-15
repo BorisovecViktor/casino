@@ -16,7 +16,7 @@ import { Balance, BuyCoins, GameTitle } from 'components'
 import { Wheels } from './wheels'
 import 'styles/roulette.css'
 import { regex_numbers, regex_zero_thirty_six } from 'utils/regex'
-import { TBetHistoryRow, TColor } from 'app/slices/game'
+import { TColor } from 'app/slices/game'
 import { Select, TextField } from 'components/shared'
 import { colorOptions } from 'app/data'
 const rouletteWheelNumbers = [
@@ -31,19 +31,12 @@ const redNumbers = [
 ]
 
 type Props = {
-  balance: number
-  betHistory: Array<TBetHistoryRow>
   onBalance: (newValue: unknown) => void
   onBetHistory: (newValue: unknown) => void
 }
 
-export const Roulette = ({
-  balance,
-  betHistory,
-  onBalance,
-  onBetHistory,
-}: Props) => {
-  const ref = useRef<HTMLDivElement>(null)
+export const Roulette = ({ onBalance, onBetHistory }: Props) => {
+  const refBall = useRef<HTMLDivElement>(null)
   const isAnimationWheel = useBoolean(false)
   const [bet, setBet] = useState<string>('')
   const [betNumber, setBetNumber] = useState<string>('')
@@ -53,14 +46,15 @@ export const Roulette = ({
   // get data from store
   const userSelector = (state: RootState) => state.User
   const stateUser = createSelector(userSelector, (state) => ({
-    user: state,
+    balance: state.balance,
+    betHistory: state.betHistory,
   }))
-  const { user } = useAppSelector(stateUser)
+  const { balance, betHistory } = useAppSelector(stateUser)
   const gameSelector = (state: RootState) => state.Game
   const stateGame = createSelector(gameSelector, (state) => ({
-    game: state,
+    gameType: state.gameType,
   }))
-  const { game } = useAppSelector(stateGame)
+  const { gameType } = useAppSelector(stateGame)
   // manage balance
   const decreaseBalance = balance - Number(bet)
 
@@ -102,7 +96,7 @@ export const Roulette = ({
       {
         date: new Date().toString(),
         amount: bet,
-        type: game.gameType,
+        type: gameType,
         result: isWinBet,
         balance: isWinBet ? newIncreasedBalance : decreaseBalance,
       },
@@ -115,7 +109,7 @@ export const Roulette = ({
     if (
       value === '' ||
       (Number(value) >= MIN_BET &&
-        Number(value) <= user.balance &&
+        Number(value) <= balance &&
         regex_numbers.test(value))
     ) {
       setBet(value)
@@ -141,14 +135,13 @@ export const Roulette = ({
     const randomNumber = Math.floor(Math.random() * rouletteWheelNumbers.length)
     const index = rouletteWheelNumbers.indexOf(randomNumber)
     const angle = (360 / rouletteWheelNumbers.length) * index
-    console.log(randomNumber)
 
     titleVisibility.setFalse()
     isAnimationWheel.setTrue()
 
-    if (ref.current) {
-      ref.current.style.transform = `rotate(${angle}deg)`
-      ref.current.style.transition = 'transform 5000ms'
+    if (refBall.current) {
+      refBall.current.style.transform = `rotate(${angle}deg)`
+      refBall.current.style.transition = 'transform 5000ms'
     }
 
     if (bet) {
@@ -168,7 +161,7 @@ export const Roulette = ({
         isVisible={titleVisibility.isTrue}
       />
       <Wheels
-        nodeRefBall={ref}
+        nodeRefBall={refBall}
         isAnimationWheel={isAnimationWheel.isTrue}
         duration={ROULETTE_DURATION}
       />
@@ -180,8 +173,8 @@ export const Roulette = ({
             label="Bet amount"
             value={bet}
             onChange={handleChangeBet}
-            placeholder={`From 1 to ${user.balance}`}
-            disabled={isAnimationWheel.isTrue || user.balance === 0}
+            placeholder={`From 1 to ${balance}`}
+            disabled={isAnimationWheel.isTrue || balance === 0}
           />
           <TextField
             id="bet-number"
@@ -189,7 +182,7 @@ export const Roulette = ({
             value={betNumber}
             onChange={handleChangeBetNumber}
             placeholder={`From ${MIN_BET_NUMBER} to ${MAX_BET_NUMBER}`}
-            disabled={isAnimationWheel.isTrue || user.balance === 0}
+            disabled={isAnimationWheel.isTrue || balance === 0}
           />
           <Select
             id="bet-color"
@@ -198,7 +191,7 @@ export const Roulette = ({
             value={betColor}
             options={colorOptions}
             onChange={handleChangeBetColor}
-            disabled={isAnimationWheel.isTrue || user.balance === 0}
+            disabled={isAnimationWheel.isTrue || balance === 0}
           />
         </Stack>
         <Button
@@ -207,7 +200,7 @@ export const Roulette = ({
           onClick={handleSpin}
           disabled={
             isAnimationWheel.isTrue ||
-            user.balance === 0 ||
+            balance === 0 ||
             !bet ||
             (betNumber === '' && betColor === '')
           }
@@ -215,7 +208,7 @@ export const Roulette = ({
           Try your luck
         </Button>
       </Stack>
-      {user.balance === 0 && !isAnimationWheel.isTrue && <BuyCoins />}
+      {balance === 0 && !isAnimationWheel.isTrue && <BuyCoins />}
     </Stack>
   )
 }

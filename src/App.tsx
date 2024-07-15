@@ -1,7 +1,7 @@
 import { Box, Stack, Tab } from '@mui/material'
 import { TabList, TabContext, TabPanel } from '@mui/lab'
-import { SlotMachine, BetHistory, Roulette } from 'components'
-import { SyntheticEvent, useEffect } from 'react'
+import { SlotMachine, BetHistory, Roulette, CryptoCurrencies } from 'components'
+import { SyntheticEvent, useEffect, useMemo } from 'react'
 import { useLocalStorage } from 'hooks/use-local-storage'
 import { GAME_TYPE } from 'utils/constants'
 import { useAppDispatch } from 'hooks/use-redux'
@@ -11,7 +11,6 @@ import {
   setBetHistory as setBetHistoryAction,
 } from 'app/slices/user'
 import { BALANCE, BET_HISTORY, TEST_BALANCE_AMOUNT } from 'utils/constants'
-import 'styles/widget.css'
 
 function App() {
   const dispatch = useAppDispatch()
@@ -38,51 +37,54 @@ function App() {
   }, [gameType, dispatch])
 
   const handleChange = (_e: SyntheticEvent, value: TGameType) => {
-    if (value === TGameType.SLOT_MACHINE) {
-      setGameType(TGameType.SLOT_MACHINE)
-    } else if (value === TGameType.ROULETTE) {
-      setGameType(TGameType.ROULETTE)
-    } else {
-      setGameType(TGameType.BET_HISTORY)
-    }
+    setGameType(value)
   }
+
+  const tabs = useMemo(
+    () => [
+      {
+        value: TGameType.SLOT_MACHINE,
+        label: 'Slot machine',
+      },
+      {
+        value: TGameType.ROULETTE,
+        label: 'Roulette',
+      },
+      {
+        value: TGameType.BET_HISTORY,
+        label: 'Bet history',
+      },
+      {
+        value: TGameType.CRYPTO_CURRENCY,
+        label: 'Crypto currencies',
+      },
+    ],
+    [],
+  )
 
   return (
     <Stack sx={{ height: '100vh' }}>
       <TabContext value={gameType}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={handleChange} aria-label="tabs" centered>
-            <Tab label="Slot machine" value={TGameType.SLOT_MACHINE} />
-            <Tab label="Roulette" value={TGameType.ROULETTE} />
-            <Tab label="Bet history" value={TGameType.BET_HISTORY} />
+            {tabs.map(({ value, label }) => (
+              <Tab key={value} label={label} value={value} />
+            ))}
           </TabList>
         </Box>
         <TabPanel value={TGameType.SLOT_MACHINE} sx={{ flexGrow: 1 }}>
-          <SlotMachine
-            balance={balance}
-            betHistory={betHistory}
-            onBalance={setBalance}
-            onBetHistory={setBetHistory}
-          />
+          <SlotMachine onBalance={setBalance} onBetHistory={setBetHistory} />
         </TabPanel>
         <TabPanel value={TGameType.ROULETTE} sx={{ flexGrow: 1 }}>
-          <Roulette
-            balance={balance}
-            betHistory={betHistory}
-            onBalance={setBalance}
-            onBetHistory={setBetHistory}
-          />
+          <Roulette onBalance={setBalance} onBetHistory={setBetHistory} />
         </TabPanel>
         <TabPanel value={TGameType.BET_HISTORY}>
           <BetHistory />
         </TabPanel>
+        <TabPanel value={TGameType.CRYPTO_CURRENCY}>
+          <CryptoCurrencies />
+        </TabPanel>
       </TabContext>
-      <Box
-        className="binance-widget-marquee"
-        data-cmc-ids="1,1027,1839,5426,3408,52,74,5805,3890,7083,2,1958"
-        data-theme="light"
-        data-transparent="true"
-      ></Box>
     </Stack>
   )
 }

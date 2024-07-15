@@ -7,14 +7,14 @@ import { useAppSelector } from 'hooks'
 export const Balance = () => {
   const userSelector = (state: RootState) => state.User
   const stateUser = createSelector(userSelector, (state) => ({
-    user: state,
+    balance: state.balance,
   }))
-  const { user } = useAppSelector(stateUser)
+  const { balance } = useAppSelector(stateUser)
 
   return (
     <Typography
       variant="h6"
       color={blue[700]}
-    >{`Balance: ${user.balance} coins`}</Typography>
+    >{`Balance: ${balance} coins`}</Typography>
   )
 }

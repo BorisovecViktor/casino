@@ -21,6 +21,7 @@
       "components/*": ["components/*"],
       "utils/*": ["utils/*"],
       "hooks/*": ["hooks/*"],
+      "api/*": ["api/*"],
       "assets/*": ["assets/*"],
       "styles/*": ["styles/*"]
     }

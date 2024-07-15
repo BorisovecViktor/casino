@@ -5,10 +5,13 @@ import { configureStore } from '@reduxjs/toolkit'
 import gameReducer from './game/reducer'
 // User
 import userReducer from './user/reducer'
+// Coin
+import coinReducer from './coin/reducer'
 
 const appReducer = combineReducers({
   Game: gameReducer,
   User: userReducer,
+  Coin: coinReducer,
 })
 
 const rootReducer = (state: any, action: any) => appReducer(state, action)

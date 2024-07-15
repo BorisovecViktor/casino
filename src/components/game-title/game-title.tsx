@@ -5,12 +5,10 @@ type Props = {
   isVisible: boolean
 }
 
-export const GameTitle = ({ isWinner, isVisible }: Props) => {
-  return (
-    <Typography
-      variant="h5"
-      color={isWinner ? 'success.main' : 'error'}
-      sx={{ opacity: isVisible ? 1 : 0, cursor: 'default' }}
-    >{`You ${isWinner ? 'win 😊' : 'lose 😭'}`}</Typography>
-  )
-}
+export const GameTitle = ({ isWinner, isVisible }: Props) => (
+  <Typography
+    variant="h5"
+    color={isWinner ? 'success.main' : 'error'}
+    sx={{ opacity: isVisible ? 1 : 0, cursor: 'default' }}
+  >{`You ${isWinner ? 'win 😊' : 'lose 😭'}`}</Typography>
+)
