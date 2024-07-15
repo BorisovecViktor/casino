@@ -26,6 +26,7 @@ export const CryptoCurrencies = () => {
   }))
   const { coins, loading } = useAppSelector(stateCoin)
 
+  // In network getCoins request performance twice this happens because React.StrictMode activates additional checks and warnings for its descendants, or in other words renders twice. Strict mode checks are run in development mode only, they do not impact the production build
   useEffect(() => {
     dispatch(getCoins())
   }, [dispatch])
