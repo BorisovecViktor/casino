@@ -1,16 +1,21 @@
 import { ChangeEvent, useState } from 'react'
 import { createSelector } from '@reduxjs/toolkit'
+import { Box, Button, Stack } from '@mui/material'
 import { RootState } from 'app/slices'
 import { TBetHistoryRow } from 'app/slices/game'
-import { Button, Link, Stack, TextField } from '@mui/material'
+import { TCurrentReel } from 'app/slices/user/types'
 import { useBoolean, useAppSelector } from 'hooks'
-import { TCurrentReel } from '../../app/slices/user/types'
-import { DURATION, MIN_BET, WIN_COEFFICIENT } from 'utils/constants'
+import {
+  SLOT_MACHINE_DURATION,
+  MIN_BET,
+  DEFAULT_WIN_COEFFICIENT,
+} from 'utils/constants'
 import { initialReels, reels } from 'app/data'
-import { Balance } from 'components'
+import { Balance, BuyCoins, GameTitle } from 'components'
 import { Reel } from './reel'
-import { ReelsTitle } from './reels-title'
+import { regex_numbers } from 'utils/regex'
 import 'styles/slot-machine.css'
+import { TextField } from 'components/shared'
 
 type Props = {
   balance: number
@@ -29,8 +34,7 @@ export const SlotMachine = ({
     useState<Array<TCurrentReel>>(initialReels)
   const isAnimation = useBoolean(false)
   const isWinner = useBoolean(false)
-  // visibility of congratulation title
-  const titleVisibility = isAnimation.isTrue || currentReels === initialReels
+  const titleVisibility = useBoolean(false)
   // current bet amount
   const [bet, setBet] = useState<string>('')
   // reels for make spinning animation effect
@@ -46,21 +50,23 @@ export const SlotMachine = ({
     game: state,
   }))
   const { game } = useAppSelector(stateGame)
-  // manage balance
-  const increaseBalance = balance + Number(bet) * WIN_COEFFICIENT
   const decreaseBalance = balance - Number(bet)
 
-  // define win / lose
+  // define win or lose / set balance / set history
   const handleWinner = (newReels: Array<TCurrentReel>) => {
     const isEqual = new Set(newReels).size === 1
+    const increasedBalance =
+      decreaseBalance + Number(bet) * DEFAULT_WIN_COEFFICIENT
 
     if (isEqual) {
       isWinner.setTrue()
 
-      onBalance(increaseBalance)
+      onBalance(increasedBalance)
     } else {
       isWinner.setFalse()
     }
+
+    titleVisibility.setTrue()
 
     onBetHistory([
       ...betHistory,
@@ -69,7 +75,7 @@ export const SlotMachine = ({
         amount: bet,
         type: game.gameType,
         result: isEqual,
-        balance: isEqual ? increaseBalance : decreaseBalance,
+        balance: isEqual ? increasedBalance : decreaseBalance,
       },
     ])
   }
@@ -77,13 +83,19 @@ export const SlotMachine = ({
   const handleChangeBet = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
 
-    if (Number(value) <= user.balance) {
+    if (
+      value === '' ||
+      (Number(value) >= MIN_BET &&
+        Number(value) <= user.balance &&
+        regex_numbers.test(value))
+    ) {
       setBet(value)
     }
   }
 
-  // define new reels state / run animation / set balance and history
+  // define new reels state / run animation / set balance
   const handleSpin = () => {
+    titleVisibility.setFalse()
     const newReels = reels.map((reel, i) => {
       const randomIndex = Math.floor(Math.random() * reel.length)
 
@@ -100,20 +112,24 @@ export const SlotMachine = ({
 
     isAnimation.setTrue()
     setCurrentReels(initialReels)
+
     if (bet) {
       onBalance(decreaseBalance)
     }
-    handleWinner(newReels)
 
     setTimeout(() => {
       setCurrentReels(newReels)
+      handleWinner(newReels)
       isAnimation.setFalse()
-    }, DURATION)
+    }, SLOT_MACHINE_DURATION)
   }
 
   return (
-    <Stack alignItems="center" justifyContent="center" spacing={1}>
-      <ReelsTitle isWinner={isWinner.isTrue} isTitleHidden={titleVisibility} />
+    <Stack alignItems="center" justifyContent="center" spacing={2}>
+      <GameTitle
+        isWinner={isWinner.isTrue}
+        isVisible={titleVisibility.isTrue}
+      />
       <Stack
         direction="row"
         alignItems="center"
@@ -127,42 +143,30 @@ export const SlotMachine = ({
             reels={spinningReels}
             reel={reel}
             isAnimation={isAnimation.isTrue}
-            duration={DURATION}
+            duration={SLOT_MACHINE_DURATION}
           />
         ))}
       </Stack>
       <Balance />
       <Stack spacing={1}>
         <TextField
-          type="number"
-          size="small"
+          id="bet-amount"
+          label="Bet amount"
           value={bet}
           onChange={handleChangeBet}
-          InputProps={{ inputProps: { min: MIN_BET, max: user.balance } }}
-          fullWidth
+          placeholder={`From 1 to ${user.balance}`}
           disabled={isAnimation.isTrue || user.balance === 0}
         />
         <Button
           variant="outlined"
-          onClick={handleSpin}
-          disabled={
-            isAnimation.isTrue ||
-            user.balance === 0 ||
-            !bet ||
-            Number(bet) === 0 ||
-            Number(bet) > user.balance
-          }
           size="large"
+          onClick={handleSpin}
+          disabled={isAnimation.isTrue || user.balance === 0 || !bet}
         >
           Try your luck
         </Button>
       </Stack>
-      <Link
-        href="/buy"
-        sx={{ opacity: user.balance === 0 && !isAnimation.isTrue ? 1 : 0 }}
-      >
-        Buy coins
-      </Link>
+      {user.balance === 0 && !isAnimation.isTrue && <BuyCoins />}
     </Stack>
   )
 }

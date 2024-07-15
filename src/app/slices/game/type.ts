@@ -11,3 +11,8 @@ export enum TGameType {
   ROULETTE = 'ROULETTE',
   BET_HISTORY = 'BET_HISTORY',
 }
+
+export enum TColor {
+  RED = 'RED',
+  BLACK = 'BLACK',
+}

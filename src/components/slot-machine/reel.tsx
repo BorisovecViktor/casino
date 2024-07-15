@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Box, Stack } from '@mui/material'
 import { CSSTransition } from 'react-transition-group'
 import { TCurrentReel, TReel } from '../../app/slices/user/types'
+import { grey } from '@mui/material/colors'
 
 type Props = {
   id: number
@@ -24,8 +25,9 @@ export const Reel = ({ id, reels, reel, isAnimation, duration }: Props) => {
       height="75px"
       borderRadius={1}
       sx={{
-        backgroundColor: 'lightgrey',
+        backgroundColor: grey[100],
         userSelect: 'none',
+        boxShadow: '1px 5px 10px rgba(0, 0, 0, 0.2)',
       }}
     >
       <CSSTransition

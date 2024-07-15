@@ -1,3 +1,6 @@
 export * from './slot-machine'
 export * from './bet-history'
 export * from './balance'
+export * from './roulette'
+export * from './game-title'
+export * from './buy-coins'

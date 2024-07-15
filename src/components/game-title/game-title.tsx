@@ -2,15 +2,15 @@ import { Typography } from '@mui/material'
 
 type Props = {
   isWinner: boolean
-  isTitleHidden: boolean
+  isVisible: boolean
 }
 
-export const ReelsTitle = ({ isWinner, isTitleHidden }: Props) => {
+export const GameTitle = ({ isWinner, isVisible }: Props) => {
   return (
     <Typography
       variant="h5"
       color={isWinner ? 'success.main' : 'error'}
-      sx={{ opacity: isTitleHidden ? 0 : 1 }}
+      sx={{ opacity: isVisible ? 1 : 0, cursor: 'default' }}
     >{`You ${isWinner ? 'win 😊' : 'lose 😭'}`}</Typography>
   )
 }

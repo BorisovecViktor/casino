@@ -15,6 +15,7 @@ import { RootState } from 'app/slices'
 import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'hooks/use-redux'
 import { v4 as uuid } from 'uuid'
+import { TGameType } from 'app/slices/game'
 
 export const BetHistory = () => {
   const userSelector = (state: RootState) => state.User
@@ -45,27 +46,35 @@ export const BetHistory = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {user.betHistory.map(({ date, amount, type, result, balance }) => (
-            <TableRow key={uuid()}>
-              <TableCell component="th" scope="row">
-                <Typography>{format(date, 'dd.MM.yyyy')}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography>{amount}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography>{type}</Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography color={result ? 'success.main' : 'error'}>
-                  {result ? 'Win' : 'Lose'}
-                </Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography>{balance}</Typography>
-              </TableCell>
-            </TableRow>
-          ))}
+          {user.betHistory.map(({ date, amount, type, result, balance }) => {
+            const id = uuid()
+
+            return (
+              <TableRow key={id}>
+                <TableCell component="th" scope="row">
+                  <Typography>{format(date, 'dd.MM.yyyy')}</Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography>{amount}</Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography>
+                    {type === TGameType.SLOT_MACHINE
+                      ? 'Slot machine'
+                      : 'Roulette'}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography color={result ? 'success.main' : 'error'}>
+                    {result ? 'Win' : 'Lose'}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Typography>{balance}</Typography>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </TableContainer>
